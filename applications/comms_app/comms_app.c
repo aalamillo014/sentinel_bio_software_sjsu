@@ -1,59 +1,51 @@
+#include "comms_app.h"
 #include <stdio.h>
 #include <string.h>
 
-// Simulated buffers
-char iridium_buffer[256];
-char sband_buffer[1024];
+// Buffers
+static char iridium_buffer[256];
+static char sband_buffer[1024];
 
 // Initialize communications system
 void COMMS_Init(void) {
-    printf("Initializing Communications System...\n");
-
-    // Initialize UART (placeholder)
-    printf("UART Initialized\n");
-
-    // Initialize Iridium
-    printf("Iridium Modem Ready\n");
-
-    // Initialize S-band
-    printf("S-band Transceiver Ready\n");
+    // In real system: initialize UART drivers
 }
 
 // Receive command from Iridium
 void COMMS_Receive_Iridium(void) {
+    // Placeholder for UART read
     strcpy(iridium_buffer, "CMD:SET_BEACON:1800");
-    printf("Received Iridium Command: %s\n", iridium_buffer);
 }
 
 // Send data via S-band
 void COMMS_Send_SBand(const char *data) {
-    printf("Transmitting via S-band: %s\n", data);
+    // Placeholder for radio transmit
 }
 
-// Fallback to Iridium
+// Send fallback via Iridium
 void COMMS_Send_Iridium(const char *data) {
-    printf("Fallback transmission via Iridium: %s\n", data);
+    // Placeholder for Iridium SBD transmit
 }
 
-// Main communication loop
-void COMMS_Run(void) {
-    COMMS_Receive_Iridium();
+// Main execution loop (called by OBC scheduler)
+void COMMS_AppMain(void) {
 
-    // Example routing logic
-    if (strlen(sband_buffer) > 0) {
-        COMMS_Send_SBand(sband_buffer);
-    } else {
-        COMMS_Send_Iridium("HEALTH_STATUS_OK");
-    }
-}
-
-// Entry point (test)
-int main(void) {
     COMMS_Init();
 
-    strcpy(sband_buffer, "SCIENCE_DATA_PACKET");
+    while (1) {
 
-    COMMS_Run();
+        // Step 1: Receive commands
+        COMMS_Receive_Iridium();
 
-    return 0;
+        // Step 2: Check if science data exists
+        if (strlen(sband_buffer) > 0) {
+            COMMS_Send_SBand(sband_buffer);
+        }
+        else {
+            COMMS_Send_Iridium("HEALTH_STATUS_OK");
+        }
+
+        // Step 3: Delay / wait (simulated scheduler)
+        // In real system: OS sleep or tick-based execution
+    }
 }
