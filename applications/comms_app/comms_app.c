@@ -1,5 +1,5 @@
 #include "comms_app.h"
-#include <stdio.h>
+#include <uart_driver.h>
 #include <string.h>
 
 // Buffers
@@ -8,25 +8,30 @@ static char sband_buffer[1024];
 
 // Initialize communications system
 void COMMS_Init(void) {
-    // In real system: initialize UART drivers
+    // Initialize UART ports
+
+    // Example ports (you will change later based on hardware)
+    UART_Init("/dev/ttyS0", 19200);   // Iridium
+    UART_Init("/dev/ttyS1", 115200);  // S-band
 }
 
 // Receive command from Iridium
 void COMMS_Receive_Iridium(void) {
-    // Placeholder for UART read
-    strcpy(iridium_buffer, "CMD:SET_BEACON:1800");
-}
+    int bytes_read = UART_Read(iridium_buffer, sizeof(iridium_buffer));
 
+    if (bytes_read > 0) {
+        // Command received successfully
+    }
+}
 // Send data via S-band
 void COMMS_Send_SBand(const char *data) {
-    // Placeholder for radio transmit
+    UART_Write(data);
 }
 
 // Send fallback via Iridium
 void COMMS_Send_Iridium(const char *data) {
-    // Placeholder for Iridium SBD transmit
+    UART_Write(data);
 }
-
 // Main execution loop (called by OBC scheduler)
 void COMMS_AppMain(void) {
 
