@@ -1,11 +1,13 @@
 #include "comms_app.h"
 #include "uart_driver.h"
 #include "packet_format.h"
+#include "packet_buffer.h"
 #include <string.h>
 
 // Buffers / mission data
 static char iridium_buffer[256];
 static SciencePacket_t science_packet;
+static SciencePacket_t downlink_packet;
 
 // Initialize communications system
 void COMMS_Init(void) {
@@ -13,6 +15,9 @@ void COMMS_Init(void) {
     // These are placeholder Linux-style device paths and will be updated later for the actual OBC hardware.
     UART_Init("/dev/ttyS0", 19200);    // Iridium
     UART_Init("/dev/ttyS1", 115200);   // S-band
+
+    // Initialize onboard packet buffer
+    PacketBuffer_Init();
 }
 
 // Create a science packet using the Sentinel Bio+ packet format
@@ -59,15 +64,26 @@ void COMMS_AppMain(void) {
         // Step 1: Receive low-rate commands through Iridium
         COMMS_Receive_Iridium();
 
-        // Step 2: Create science packet from payload data
+        // Step 2: Create new science packet
         COMMS_Create_SciencePacket();
 
-        // Step 3: Prioritize S-band for science data downlink
-        COMMS_Send_SBand(&science_packet);
+        // Step 3: Store science packet in onboard buffer
+        if (PacketBuffer_Add(&science_packet) != 0) {
+            COMMS_Send_Iridium("BUFFER_FULL");
+        }
 
-        // Step 4: Future work:
-        // - Add pass scheduling
-        // - Add packet buffering
-        // - Add fallback logic if S-band is unavailable
+        // Step 4: Downlink next buffered packet through S-band
+        if (PacketBuffer_GetNext(&downlink_packet) == 0) {
+            COMMS_Send_SBand(&downlink_packet);
+        }
+        else {
+            COMMS_Send_Iridium("NO_SCIENCE_DATA");
+        }
+
+        // Future work:
+        // - Add AWS ground station pass scheduling
+        // - Add real timestamping
+        // - Add checksum calculation
+        // - Add S-band availability checks
     }
 }
