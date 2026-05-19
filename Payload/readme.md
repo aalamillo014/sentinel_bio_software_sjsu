@@ -1,0 +1,42 @@
+# Payload Applications
+
+This folder contains all payload flight software applications for the Sentinel Bio+ mission payload subsystem.
+
+The payload software follows a modular architecture inspired by NASA Core Flight System (cFS) principles, where each application is responsible for a dedicated payload function including sensor interfacing, telemetry handling, synchronization, and fault monitoring.
+
+## Planned Payload Applications
+
+- `rila_app`: Handles communication with the RILA radiation dosimeter, including packet reception, CRC validation, spectrum parsing, and radiation data buffering.
+
+- `mag_app`: Handles magnetometer communication, CCSDS packet parsing, synchronization, and magnetic field vector processing (X, Y, Z measurements).
+
+- `accel_app`: Interfaces with the accelerometer subsystem for drag and atmospheric density estimation support.
+
+- `zes_payload_app`: Acts as the central payload aggregation and telemetry application. Combines RILA, magnetometer, and accelerometer data into unified payload packets and forwards formatted telemetry to the OBC.
+
+- `payload_hk_app`: Generates payload housekeeping telemetry including temperatures, voltages, current measurements, watchdog status, and payload health indicators.
+
+- `payload_sync_app`: Handles payload timing coordination, sensor synchronization, sequence counters, and timestamp alignment across payload sensors.
+
+- `payload_failsafe_app`: Monitors payload subsystem health and performs autonomous recovery actions including sensor resets, watchdog recovery, and safe-mode payload shutdown.
+
+## Notes
+
+Payload applications communicate with the OBC through UART-based telemetry interfaces.
+
+The ZES payload controller serves as the primary payload aggregation node and produces the final payload telemetry products transmitted to the spacecraft bus.
+
+Payload telemetry packets include:
+- RILA science data
+- Magnetometer vector measurements
+- Accelerometer measurements
+- Sequence and timing information
+- Sensor validity flags
+- Payload health indicators and error counters
+
+The payload architecture supports:
+- synchronized sensor acquisition
+- CCSDS-style packet handling
+- CRC-protected telemetry
+- remote debugging and telemetry tracing
+- autonomous fault detection and recovery
